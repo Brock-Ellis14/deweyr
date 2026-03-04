@@ -7,10 +7,14 @@
 #' @param api_key Your Dewey API key. Store in \code{.Renviron} as
 #'   \code{DEWEY_API_KEY} and access with \code{Sys.getenv("DEWEY_API_KEY")}.
 #' @param data_id The Dewey dataset ID (e.g. \code{"prj_xxx__fldr_yyy"}).
+#' @param preview If \code{TRUE}, returns only the first file URL instead of
+#'   paginating the full dataset manifest. Used internally by \code{preview_dewey()}.
+#'   Defaults to \code{FALSE}.
 #'
 #' @return A list with the following fields:
 #' \describe{
-#'   \item{urls}{Character vector of download URLs for all files in the dataset}
+#'   \item{urls}{Character vector of download URLs for all files in the dataset,
+#'     or a single URL string if \code{preview = TRUE}}
 #'   \item{parent_folder}{Derived folder name for the dataset}
 #'   \item{file_extension}{File extension of the dataset files}
 #'   \item{partition_key}{Dewey's suggested partition column, or \code{NULL}}
@@ -25,20 +29,21 @@
 #' \dontrun{
 #' api_key <- Sys.getenv("DEWEY_API_KEY")
 #' result <- get_dewey_urls(api_key, "prj_xxx__fldr_yyy")
-#' result$urls
+#' result$urls # character vector of all URLs
 #' result$partition_key
+#'
+#' # Preview mode — returns only first URL
+#' result <- get_dewey_urls(api_key, "prj_xxx__fldr_yyy", preview = TRUE)
+#' result$urls # single URL string
 #' }
 #'
 #' @export
-get_dewey_urls <- function(api_key, data_id) {
+get_dewey_urls <- function(api_key, data_id, preview = FALSE) {
     data_id <- parse_url(data_id)
     script <- system.file("python/get_dewey_urls.py", package = "deweyr")
-    result_raw <- system2(
-        "uv",
-        args = c("run", "--python", "3.13", script, api_key, data_id),
-        stdout = TRUE,
-        stderr = FALSE
-    )
+    args <- c("run", "--python", "3.13", script, api_key, data_id)
+    if (preview) args <- c(args, "preview")
+    result_raw <- system2("uv", args = args, stdout = TRUE, stderr = FALSE)
     jsonlite::fromJSON(result_raw)
 }
 
@@ -80,7 +85,7 @@ get_dewey_urls <- function(api_key, data_id) {
 #'
 #' @export
 preview_dewey <- function(api_key, data_id, limit = 10, where = NULL) {
-    result <- get_dewey_urls(api_key, data_id)
+    result <- get_dewey_urls(api_key, data_id, preview = TRUE)
     urls <- result$urls
     file_extension <- result$file_extension
 
@@ -226,6 +231,8 @@ download_dewey <- function(api_key, data_id, output_dir, partition, overwrite = 
         unlink(out, recursive = TRUE)
     }
 
+    dir.create(out, recursive = TRUE, showWarnings = FALSE)
+
     con <- DBI::dbConnect(duckdb::duckdb())
     on.exit(DBI::dbDisconnect(con))
     DBI::dbExecute(con, "INSTALL httpfs; LOAD httpfs;")
@@ -247,7 +254,6 @@ download_dewey <- function(api_key, data_id, output_dir, partition, overwrite = 
        OVERWRITE_OR_IGNORE true)"
         ))
     } else {
-        dir.create(out, recursive = TRUE, showWarnings = FALSE)
         DBI::dbExecute(con, glue::glue(
             "COPY (
         SELECT {select_sql} FROM {read_fn}({urls_sql})
