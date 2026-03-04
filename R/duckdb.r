@@ -231,6 +231,8 @@ download_dewey <- function(api_key, data_id, output_dir, partition, overwrite = 
         unlink(out, recursive = TRUE)
     }
 
+    dir.create(out, recursive = TRUE, showWarnings = FALSE)
+
     con <- DBI::dbConnect(duckdb::duckdb())
     on.exit(DBI::dbDisconnect(con))
     DBI::dbExecute(con, "INSTALL httpfs; LOAD httpfs;")
@@ -252,7 +254,6 @@ download_dewey <- function(api_key, data_id, output_dir, partition, overwrite = 
        OVERWRITE_OR_IGNORE true)"
         ))
     } else {
-        dir.create(out, recursive = TRUE, showWarnings = FALSE)
         DBI::dbExecute(con, glue::glue(
             "COPY (
         SELECT {select_sql} FROM {read_fn}({urls_sql})
