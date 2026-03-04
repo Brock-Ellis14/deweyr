@@ -4,18 +4,23 @@
 \alias{get_dewey_urls}
 \title{Get Dewey dataset file metadata}
 \usage{
-get_dewey_urls(api_key, data_id)
+get_dewey_urls(api_key, data_id, preview = FALSE)
 }
 \arguments{
 \item{api_key}{Your Dewey API key. Store in \code{.Renviron} as
 \code{DEWEY_API_KEY} and access with \code{Sys.getenv("DEWEY_API_KEY")}.}
 
 \item{data_id}{The Dewey dataset ID (e.g. \code{"prj_xxx__fldr_yyy"}).}
+
+\item{preview}{If \code{TRUE}, returns only the first file URL instead of
+paginating the full dataset manifest. Used internally by \code{preview_dewey()}.
+Defaults to \code{FALSE}.}
 }
 \value{
 A list with the following fields:
 \describe{
-\item{urls}{Character vector of download URLs for all files in the dataset}
+\item{urls}{Character vector of download URLs for all files in the dataset,
+or a single URL string if \code{preview = TRUE}}
 \item{parent_folder}{Derived folder name for the dataset}
 \item{file_extension}{File extension of the dataset files}
 \item{partition_key}{Dewey's suggested partition column, or \code{NULL}}
@@ -31,8 +36,12 @@ and \code{download_dewey()}.
 \dontrun{
 api_key <- Sys.getenv("DEWEY_API_KEY")
 result <- get_dewey_urls(api_key, "prj_xxx__fldr_yyy")
-result$urls
+result$urls # character vector of all URLs
 result$partition_key
+
+# Preview mode — returns only first URL
+result <- get_dewey_urls(api_key, "prj_xxx__fldr_yyy", preview = TRUE)
+result$urls # single URL string
 }
 
 }
