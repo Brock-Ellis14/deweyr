@@ -39,30 +39,30 @@
 #' @examples
 #' \dontrun{
 #' # Basic usage - auto-detect Python path, default download location
-#' dewey_download(api_key = "your-api-key", folder_id = "folder123")
+#' download_dewey_py(api_key = "your-api-key", folder_id = "folder123")
 #' 
 #' # Specify custom download path
-#' dewey_download(
+#' download_dewey_py(
 #'   api_key = "your-api-key", 
 #'   folder_id = "folder123",
 #'   download_path = "C:/Downloads/my-files"
 #' )
 #' 
 #' # Advanced: Download only recent data from partitioned dataset
-#' dewey_download(
+#' download_dewey_py(
 #'   api_key = "your-api-key", 
 #'   folder_id = "folder123",
 #'   partition_key_after = "2024-01-01"
 #' )
 #' 
 #' # Advanced: Adjust workers for specific performance needs
-#' dewey_download(
+#' download_dewey_py(
 #'   api_key = "your-api-key", 
 #'   folder_id = "folder123",
 #'   num_workers = 4
 #' )
 #' }
-dewey_download_py <- function(api_key, 
+download_dewey_py <- function(api_key, 
                            folder_id, 
                            download_path = NULL, 
                            python_path = NULL,

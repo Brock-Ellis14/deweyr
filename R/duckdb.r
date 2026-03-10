@@ -21,23 +21,8 @@
 #'   \item{file_size_bytes}{Total size of the dataset in bytes}
 #' }
 #'
-#' @seealso
-#' `vignette("onedrive-uv-cache", package = "deweyr")` for setup instructions
-#' if you are caching downloads to OneDrive or using uv to manage Python.
-#'
-#' @examples
-#' \dontrun{
-#' api_key <- Sys.getenv("DEWEY_API_KEY")
-#' result <- get_dewey_urls(api_key, "prj_xxx__fldr_yyy")
-#' result$urls # character vector of all URLs
-#' result$partition_key
-#'
-#' # Preview mode — returns only first URL
-#' result <- get_dewey_urls(api_key, "prj_xxx__fldr_yyy", preview = TRUE)
-#' result$urls # single URL string
-#' }
-#'
-#' @export
+#' @keywords internal
+#' @noRd
 get_dewey_urls <- function(api_key, data_id, preview = FALSE) {
     data_id <- parse_url(data_id)
     script <- system.file("python/get_dewey_urls.py", package = "deweyr")
@@ -55,7 +40,7 @@ get_dewey_urls <- function(api_key, data_id, preview = FALSE) {
 #'
 #' To get just column names with no data:
 #' ```r
-#' colnames(preview_dewey(api_key, data_id, limit = 0))
+#' colnames(preview_dewey_duck(api_key, data_id, limit = 0))
 #' ```
 #'
 #' @param api_key Your Dewey API key. Store in \code{.Renviron} as
@@ -74,17 +59,17 @@ get_dewey_urls <- function(api_key, data_id, preview = FALSE) {
 #' data_id <- "prj_xxx__fldr_yyy"
 #'
 #' # Preview first 10 rows
-#' preview_dewey(api_key, data_id)
+#' preview_dewey_duck(api_key, data_id)
 #'
 #' # Get column names only
-#' colnames(preview_dewey(api_key, data_id, limit = 0))
+#' colnames(preview_dewey_duck(api_key, data_id, limit = 0))
 #'
 #' # Filter preview
-#' preview_dewey(api_key, data_id, where = "CARRIER_GROUP = 'Major'")
+#' preview_dewey_duck(api_key, data_id, where = "CARRIER_GROUP = 'Major'")
 #' }
 #'
 #' @export
-preview_dewey <- function(api_key, data_id, limit = 10, where = NULL) {
+preview_dewey_duck <- function(api_key, data_id, limit = 10, where = NULL) {
     result <- get_dewey_urls(api_key, data_id, preview = TRUE)
     urls <- result$urls
     file_extension <- result$file_extension
@@ -140,30 +125,30 @@ preview_dewey <- function(api_key, data_id, limit = 10, where = NULL) {
 #' base_dir <- "C:/dewey-downloads"
 #'
 #' # Use dewey's default partition
-#' download_dewey(api_key, data_id, base_dir)
+#' download_dewey_duck(api_key, data_id, base_dir)
 #'
 #' # Supply your own partition column
-#' download_dewey(api_key, data_id, base_dir, partition = "MONTH_DATE_PARSED")
+#' download_dewey_duck(api_key, data_id, base_dir, partition = "MONTH_DATE_PARSED")
 #'
 #' # No partitioning
-#' download_dewey(api_key, data_id, base_dir, partition = NULL)
+#' download_dewey_duck(api_key, data_id, base_dir, partition = NULL)
 #'
 #' # Filter and select columns
-#' download_dewey(api_key, data_id, base_dir,
+#' download_dewey_duck(api_key, data_id, base_dir,
 #'     partition = "MONTH_DATE_PARSED",
 #'     where = "CARRIER_GROUP = 'Major'",
 #'     select = c(1:3, "TOTAL")
 #' )
 #'
 #' # Download and read in one step
-#' df <- download_dewey(api_key, data_id, base_dir, partition = "MONTH_DATE_PARSED") |>
+#' df <- download_dewey_duck(api_key, data_id, base_dir, partition = "MONTH_DATE_PARSED") |>
 #'     read_dewey()
 #' }
 #'
 #' @export
-download_dewey <- function(api_key, data_id, output_dir, partition, overwrite = FALSE, where = NULL, select = NULL) {
+download_dewey_duck <- function(api_key, data_id, output_dir, partition, overwrite = FALSE, where = NULL, select = NULL) {
     result <- get_dewey_urls(api_key, data_id)
-    cols <- colnames(preview_dewey(api_key, data_id, limit = 0))
+    cols <- colnames(preview_dewey_duck(api_key, data_id, limit = 0))
 
     if (missing(partition)) {
         if (!is.null(result$partition_key) && result$partition_key %in% cols) {
@@ -274,7 +259,7 @@ download_dewey <- function(api_key, data_id, output_dir, partition, overwrite = 
 #' Read a downloaded Dewey dataset
 #'
 #' Reads a locally downloaded Dewey dataset back into R as a tibble. Use after
-#' \code{download_dewey()} or pass a path directly to a previously downloaded dataset.
+#' \code{download_dewey_duck()} or pass a path directly to a previously downloaded dataset.
 #'
 #' For advanced queries, use DuckDB directly. deweyr sets up the path for you:
 #'
@@ -303,18 +288,18 @@ download_dewey <- function(api_key, data_id, output_dir, partition, overwrite = 
 #' @examples
 #' \dontrun{
 #' # Read after download
-#' df <- read_dewey("C:/dewey-downloads/airline-employment")
+#' df <- read_dewey_duck("C:/dewey-downloads/airline-employment")
 #'
 #' # Pipe directly from download
-#' df <- download_dewey(api_key, data_id, base_dir, partition = "MONTH_DATE_PARSED") |>
-#'     read_dewey()
+#' df <- download_dewey_duck(api_key, data_id, base_dir, partition = "MONTH_DATE_PARSED") |>
+#'     read_dewey_duck()
 #'
 #' # Filter on read
-#' df <- read_dewey("C:/dewey-downloads/airline-employment", where = "CARRIER_GROUP = 'Major'")
+#' df <- read_dewey_duck("C:/dewey-downloads/airline-employment", where = "CARRIER_GROUP = 'Major'")
 #' }
 #'
 #' @export
-read_dewey <- function(path, where = NULL) {
+read_dewey_duck <- function(path, where = NULL) {
     path_read <- gsub("\\\\", "/", path)
 
     # Build optional WHERE clause — user supplied, no validation

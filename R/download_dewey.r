@@ -49,40 +49,40 @@
 #' @examples
 #' \dontrun{
 #' # Basic usage with default settings
-#' dewey_download(
+#' download_dewey(
 #'   api_key = "your-api-key",
 #'   folder_id = "folder123"
 #' )
 #' 
 #' # Specify custom download location
-#' dewey_download(
+#' download_dewey(
 #'   api_key = "your-api-key",
 #'   folder_id = "folder123",
 #'   download_path = "C:/my-data"
 #' )
 #' 
 #' # Use a different Python version
-#' dewey_download(
+#' download_dewey(
 #'   api_key = "your-api-key",
 #'   folder_id = "folder123",
 #'   python_version = "3.12"
 #' )
 #' 
 #' # Advanced: Multi-threaded download with 16 workers
-#' dewey_download(
+#' download_dewey(
 #'   api_key = "your-api-key",
 #'   folder_id = "folder123",
 #'   num_workers = 16
 #' )
 #' 
 #' # Advanced: Download only partitions after a specific date
-#' dewey_download(
+#' download_dewey(
 #'   api_key = "your-api-key",
 #'   folder_id = "folder123",
 #'   partition_key_after = "2024-01-01"
 #' )
 #' }
-dewey_download <- function(api_key,
+download_dewey <- function(api_key,
                            folder_id,
                            download_path = NULL,
                            python_version = "3.13",
@@ -101,7 +101,7 @@ dewey_download <- function(api_key,
   }
   
   # Step 1: Check for uv
-  if (!has_uv()) {
+  if (!check_uv()) {
     install_uv()
     message("Restarting the terminal will increase speed of future runs")
   }

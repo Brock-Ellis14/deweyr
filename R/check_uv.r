@@ -13,7 +13,7 @@
 #'
 #' @keywords internal
 #' @noRd
-has_uv <- function() {
+check_uv <- function() {
   Sys.which("uv") != ""
 }
 
