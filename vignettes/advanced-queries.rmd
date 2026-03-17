@@ -29,7 +29,7 @@ The cheapest query is one that never downloads data you don't need. Use `where` 
 ```{r, eval=FALSE}
 # Only download Major carriers after Feb 2025, and only the columns you need
 download_dewey_duck(
-    api_key, data_id, base_dir,
+    api_key, data_id,
     partition = "MONTH_DATE_PARSED",
     where = "CARRIER_GROUP = 'Major' AND MONTH_DATE_PARSED > '2025-02-01'",
     select = c("CARRIER_NAME", "FULL_TIME", "PART_TIME", "TOTAL", "MONTH_DATE_PARSED")
@@ -123,9 +123,9 @@ DBI::dbDisconnect(con)
 
 ## Why Raw SQL Instead of dplyr?
 
-When you call `read_dewey()` it loads the entire result into a tibble in R memory before you can filter or aggregate with dplyr. With raw DuckDB SQL, the filtering and aggregation happen inside the parquet scan itself — DuckDB never loads rows it doesn't need. For large datasets this is the difference between a query that takes seconds and one that takes minutes or runs out of memory.
+When you call `read_dewey_duck()` it loads the entire result into a tibble in R memory before you can filter or aggregate with dplyr. With raw DuckDB SQL, the filtering and aggregation happen inside the parquet scan itself — DuckDB never loads rows it doesn't need. For large datasets this is the difference between a query that takes seconds and one that takes minutes or runs out of memory.
 
-Use `read_dewey()` for convenience on small or pre-filtered datasets. Use raw DuckDB SQL when performance matters.
+Use `read_dewey_duck()` for convenience on small or pre-filtered datasets. Use raw DuckDB SQL when performance matters.
 
 ---
 
