@@ -24,12 +24,16 @@
 #' @keywords internal
 #' @noRd
 get_dewey_urls <- function(api_key, data_id, preview = FALSE) {
-    data_id <- parse_url(data_id)
-    script <- system.file("python/get_dewey_urls.py", package = "deweyr")
-    args <- c("run", "--python", "3.13", script, api_key, data_id)
-    if (preview) args <- c(args, "preview")
-    result_raw <- system2("uv", args = args, stdout = TRUE, stderr = FALSE)
-    jsonlite::fromJSON(paste(result_raw, collapse = ""))
+  if (!check_uv()) {
+    install_uv()
+    message("Restarting the terminal will increase speed of future runs")
+  }
+  data_id <- parse_url(data_id)
+  script <- system.file("python/get_dewey_urls.py", package = "deweyr")
+  args <- c("run", "--python", "3.13", script, api_key, data_id)
+  if (preview) args <- c(args, "preview")
+  result_raw <- system2("uv", args = args, stdout = TRUE, stderr = FALSE)
+  jsonlite::fromJSON(paste(result_raw, collapse = ""))
 }
 
 #' Preview a Dewey dataset
