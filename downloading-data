@@ -1,26 +1,10 @@
-# Method 1: Using UV (Recommended)
+# Downloading Data
 
 The easiest way to get started - no Python installation required:
 ```r
 library(deweyr)
 
 download_dewey(
-  api_key = "your-api-key",
-  folder_id = "your-folder-id"
-)
-```
-
-> **First-time setup:** If UV isn't installed, `deweyr` will install it automatically. You may see a message recommending you restart your terminal for optimal performance in future runs.
-
-
-
-# Method 2: Using Existing Python
-
-If you already have Python and deweypy installed:
-```r
-library(deweyr)
-
-dewey_download_py(
   api_key = "your-api-key",
   folder_id = "your-folder-id"
 )
